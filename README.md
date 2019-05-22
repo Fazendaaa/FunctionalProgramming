@@ -15,11 +15,17 @@ Imutabilidade funciona como uma regra que diz que uma função pura não deve se
 ```haskell
 addTwo :: Integral a => a -> a -> a
 addTwo a b = (+) a b
+
+main :: IO()
+main = do
+    print $ addTwo 1 2
 ```
 
 Se seu equivalente fosse implementado em uma linguagem não funcional ou até mesmo que seja multiparadgima -- sendo ela "não pura" -- como JavaScript, seria algo do tipo:
 ```javascript
 const addTwo = (a, b) => a + b;
+
+addTwo(1, 2);
 ```
 Na prática as duas realizarão a mesma conta se passado os valores 1 e 2 como paramêtros, todavia, em chamadas subsequentes da mesma função com os mesmos valores, a implementação em JavaScript irá recalcular o valor, fazendo novamente a operção `1 + 2`, diferentemente da implementação feita em Haskell que simplesmente irá retornar `3` direto.
 
@@ -55,8 +61,45 @@ Todas essas aparentes "restrições" que pureza impõe acabam tornando na verdad
 
 ### Composição de Funções
 
-### Recursividade
+### Recursão
+Recursão é o ato de uma função chamar ela mesma, para isso a função em si deve ter uma condição de parada -- uma característica na qual ela irá de parar de fazer chamadas a ela mesma --, isso por si só não é uma característica de linguagens funcionais uma vez que é uma característica de linguagens de programação em si.
 
+#### Sem loops
+"Sem loops" é uma afirmação muito pesada para ser generalizada, mas linguagens funcionais  pelo menos desencorajam o uso de estruturas comuns em percorrer estuturas como `for` ou `while` que são comuns em outras linguagens -- até mesmo o `do ... while ` --, uma vez que elas não seguem um lema funcional de: _"se preocupe com a forma mas sim a com a ideia"_, ou seja, ao invés de se preocupar em como se deve percorrer uma estrutura, se preocupe em como a ideia do que fazer com cada elemento da estrutura.
+
+Ao invés de utilizar essas maneiras mais tradicionais de outras linguagens, algumas outras maneiras de se percorrer arrays ou listas são as apresentadas a seguir.
+
+##### Map
+Mapear um array é o ato de percorrer um array e realizar operações com cada um de seus elementos retornando um novo array com esses novos valores nele:
+```haskell
+main :: IO()
+main = do
+    print $ map (+1) [1..10]
+```
+
+Nesse caso, o `map` irá percorrer cada um dos valores do array de um a dez e adicionar um valor à eles, retornando um novo array `[2, 3, 4, ..., 11]`.
+
+##### Filter
+Como o nome pode indicar, filtra os valores de um array dada uma condição, retornando os valores em um novo array:
+```haskell
+main :: IO()
+main = do
+    print $ filter (\x -> (==) 0 (mod x 2)) [1..10]
+```
+
+Já, neste caso, apenas os valores pares dentro do array serão retornados, ou seja, `[2, 4, 6, ..., 10]`.
+
+##### Reduce
+"Reduzir" um array é o equivalente a percorrer ele aplicando uma operação a cada um de seus elementos e acumular esse valor em uma variável a ser retornada. No exemplo seguinte é utilizada a função `foldl` que é uma das implementações do reduce em Haskell, ela será utilizada para somar todos os valores de um array:
+```haskell
+main :: IO()
+main = do
+    print $ foldl (+) 0 [1..10]
+```
+
+A função recebeu três paramentros, o primeiro é a função a ser utilizada, o segundo é o valor inicial e o terceiro é o array a ser percorrido. O zero do segundo parametro serve como o valor a ser dado durante a primeira operação de soma, ele não pode fazer sentido em uma função de soma, mas caso se fosse uma multiplicação um outro fator poderia ser aplicado.
+
+A diferença tradizda por `foldl` pode ser gritante em outros "reduces" de outras linguagens, ainda mais quando não se sabe o limite do array, o que pode ser aplicado principalmente em Haskell em [verificações não estritas](#verifica%C3%A7%C3%B5es-n%C3%A3o-estritas). Outra diferença é que existe um `foldr` que pode ser visto no apendice [foldl vs foldr](#foldl-vs-foldr).
 
 ### Estruturas de controle
 #### Pattern Matching
@@ -152,6 +195,9 @@ main = do
     let nth = 10001
     print $ (last . take ((-) nth 1)) [ number | number <- [2..], isPrime number ]
 ```
+
+## Apêndicie
+### Foldl vs Foldr
 
 ## Referências
 
