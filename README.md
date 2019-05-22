@@ -1,3 +1,9 @@
+---
+title: Paradigma Funcional
+author:
+  - first Lucas
+  - second de Almeida Carotta
+---
 Nome: Lucas de Almeida Carotta
 
 #USP: 8598732
