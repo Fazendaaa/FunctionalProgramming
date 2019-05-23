@@ -1,14 +1,10 @@
 ---
 title: Paradigma Funcional
 author:
-  - first Lucas
-  - second de Almeida Carotta
+  - Lucas de Almeida Carotta
+  - USP 8598732
 ---
-Nome: Lucas de Almeida Carotta
 
-#USP: 8598732
-
-# Paradigma Funcional
 Durante o decorrer deste trabalho, os exemplos utilizados para demonstrar o paradigma funcional foram feitos em [Haskell](https://www.haskell.org/), que podem ser escritos em arquviso `.hs` e rodados com o [Glasgow Haskell Compiler (GHC)](https://www.haskell.org/downloads/) no computador, há uma alternativa online para rodar tais exemplos, o [repl.it](https://repl.it/languages/haskell). Tal linguagem fora escolhida devido a facilidade e conhecimento prévio dela.
 
 ## Noções Básicas
@@ -35,6 +31,17 @@ addTwo(1, 2);
 ```
 Na prática as duas realizarão a mesma conta se passado os valores 1 e 2 como paramêtros, todavia, em chamadas subsequentes da mesma função com os mesmos valores, a implementação em JavaScript irá recalcular o valor, fazendo novamente a operção `1 + 2`, diferentemente da implementação feita em Haskell que simplesmente irá retornar `3` direto.
 
+A imutabilidate não é apenas válidas para funções mas também para variáveis, ou seja, uma vez que uma "variável" recebe um valor, ela não pode mudar mais ele -- okay, se você já conhece Haskell ou outras linguagens, sabe do uso do `let`, mas ele não torna a função ou variável imutável ou até mesmo [pura](#pureza) --; então o seguinte código retornaria um erro durante a compilação:
+```haskell
+main :: IO()
+main = do
+    foo = 1
+    foo = 2
+    print $ foo
+```
+
+O GHC pegaria a segunda atribuição de `foo` e a marcaria como inválida, não permitindo a execução do programa. Por essas e outras as variáveis possuem outro nome em linguagens funcionais, **constantes**.
+
 Cenários asssim que representam a vantagem da imutabilidade. Tendo isto em mente, há casos que realmente o valor de retorno pode varia dado há uma conexão de internet, banco de dados ou até mesmo leitura de arquivos, casos assim são conhecidos por gerarem [efeitos colaterais](#efeitos-colaterais).
 
 #### Efeitos colaterais
@@ -56,16 +63,50 @@ Como funções puras podem sim causar [efeitos colaterais](#efeitos-colaterais),
 
 Todas essas aparentes "restrições" que pureza impõe acabam tornando na verdade o código mais simples de se entender.
 
-### Estilo Pointfree
+### Composição de Funções
+Na matemática vista no ensino básico é ensinado composição de funções, na qual uma função redireciona seu resultado como entrada para outra:
+$$f(x) = x + 1$$
+$$g(y) = y * 2$$
+$$f(g(y)) = f \circ g(y) = (y * 2) + 1$$
+$$g(f(x)) = g \circ f(x) = (x + 1) * 2$$
+
+Em linguagens funcionais o mesmo pode ser alcançado através de operadores que desempenham o mesmo. Exemplo:
+```haskell
+isEven :: Integer -> Bool
+isEven a = (==) (mod a 2) 0
+
+main :: IO()
+main = do
+    print $ isEven 10
+    print $ (not . isEven) 10
+```
+
+No caso de Haskell tal operador é dado através do ponto mesmo, ao invés de se criar uma função `isOdd` o mesmo pode ser realizado para esse caso ao se compor o `not` com a função `isEven` uma vez que todo número par não é um número ímpar, basta verificar-se se um número é par e negar seu resultado para obter-se se o mesmo é ou não um número ímpar.
+
+### Notação de ponto livre
 É uma maneira de compor funções sem expecificar seus argumentos.
 
+Como pode é mostrado nos exemplos em Haskell até agora, as funções possuem um "header" com seu nome e os tipos de dados que recebem e retornam; essa informação não é necessária uma vez que o compilador é autossuficiente para inferir elas. Só que, por causa delas, a notação de ponto livre pode ser melhor explicada:
+```haskell
+addFive x = (+) x 5
+
+multiplyByTwo y = (*) y 2
+
+addFiveAndMutplityByTwo = addFive . multiplyByTwo
+
+main :: IO()
+main = do
+    print $ addFiveAndMutplityByTwo 1
+```
+
+Como a função `addFiveAndMutplityByTwo` é formada pela composição de outras duas, `addFive` e `multiplyByTwo`, seus parametros não precisam ser explicitados pois ela "herda" a definição da composição pela qual é formada; o que a torna menos verbosa e reduz redundâncias.
+
 ### Funções de Alta Ordem
-* Pode receber funções como parametros
-* Pode retornar funções
+- Pode receber funções como parametros
+- Pode retornar funções
 
 #### Funções Anonimas
-
-### Composição de Funções
+Também conhecidas como funções lambdas
 
 ### Recursão
 Recursão é o ato de uma função chamar ela mesma, para isso a função em si deve ter uma condição de parada -- uma característica na qual ela irá de parar de fazer chamadas a ela mesma --, isso por si só não é uma característica de linguagens funcionais uma vez que é uma característica de linguagens de programação em si.
@@ -114,12 +155,49 @@ A diferença tradizda por `foldl` pode ser gritante em outros "reduces" de outra
 
 #### If Then Else
 
-### Closures
-
 ### Currying
-Currying é a técnica de aplicar-se parcialmente uma função, aplicando-se mais de duas funções sendo que cada uma aceita um parametro e retorna um resultado, permitindo a iluzão de uma função de multiplos parametros.
+Currying é a técnica de aplicar-se parcialmente uma função, aplicando-se mais de duas funções sendo que cada uma aceita **UM** parametro e retorna **UM** resultado, permitindo a ilusão de uma função de multiplos parametros:
+```haskell
+addTwo :: Integral a => a -> a -> a
+addTwo x y = (+) x y
 
-## Predicados
+partialAdd x = addTwo x
+
+main :: IO()
+main = do
+  let partialAdded = partialAdd 5
+  print $ partialAdded 2
+```
+
+Como a constante `y` da função `addTwo` não sofreu um binding na em `partialAdd`, ela continuou solta ao ser invocada a função em `partialAdded`, constante `y` sofreu o binding nela, então quando ela é invocada com o valor 2, o valor apresentado na tela é 7 uma vez que o cinco já havia sido atrelado à constante `x` anteriormente.
+
+### Closures
+Closures são funções que retornam outras funções, ou seja, fazem parte das [funções de alta ordem](#fun%C3%A7%C3%B5es-de-alta-ordem), só que, além disso, elas também guardam em si valores das sua primeira chamada para ser utilizado em chamadas subsequentes. Exemplo:
+```haskell
+powerOf :: Integer a => a -> (\a -> a)
+powerOf x = (\y -> y ^ x)
+
+powerOfTwo :: Integer a => a -> a
+powerOfTwo y = powerOf y 2
+
+powerOfThree :: Integer a => a -> a
+powerOfThree y = powerOf y 3
+
+main :: IO()
+main = do
+    print $ powerOfTwo 2
+    print $ powerOfTwo 3
+    print $ powerOfThree 2
+```
+
+Nesse caso a função `powerOf` recebe, em sua primeira chamada, um número para servir de expoente para futuras chamadas; já as funções `powerOfTwo` e `powerOfThree` são derivadas dela com o expoente fixados, elas só recebem valores diferentes para servir de base. Ou seja, os valores que serão mostrados são os seguintes:
+```shell
+4
+9
+8
+```
+
+Após essa explicação, a diferença entre closures e [currying](#currying) pode ter ficado mais clara, mas caso não tenha ficado, só pensar que closure trata-se de uma aplicação de composição de funções sem [variáveis livres](#vari%C3%A1veis-livres), enquanto currying possuí tais variáveis livres em seu contexto.
 
 ## Arrays
 
@@ -136,7 +214,7 @@ Antes de se explicar mais sobre [Haskell](#haskell), um tópico importante a se 
 
 ### Redução Beta
 
-### Variáveis livres
+### Variáveis Livres
 
 ### Argumentos múltiplos
 
@@ -144,8 +222,9 @@ Antes de se explicar mais sobre [Haskell](#haskell), um tópico importante a se 
 
 ## Haskell
 Haskell é famosa por:
-* Enfatizar segurança
-* Ser utilizada na indústria em na comunidade Open Source
+
+- Enfatizar segurança
+- Ser utilizada na indústria em na comunidade Open Source
   
 Seu nome é dada em homengem à Haskell Curry, um matemático americano famoso pelo seu trabalho em lógica combinatória; tanto que o nome originalmente pensado a ser dado à linguagem era para ser Curry, mas após os desenvolvedores perceberem que já havia uma linguagem com esse nome decidiram mudar para Haskell.
 
@@ -156,16 +235,18 @@ Diferemente de muitas linguagens, mesmo as funcionais, Haskell não possui o fam
 
 ### Polimorfismo
 Polimorfismo significa "feito de várias formas". E, em Haskell, há dois tipos deles:
-* Parametrico: se refere há um tipo de variável/parametro the são completamente polimórificos;
-* Restrito -- também conhecido como 'ad-hoc' --: coloca um limit de tipo na variável, sendo que a medida que o número de tipos diminuí, se aumenta o segurança da operação realizada com eles.
+
+- Parametrico: se refere há um tipo de variável/parametro the são completamente polimórificos;
+- Restrito -- também conhecido como 'ad-hoc' --: coloca um limit de tipo na variável, sendo que a medida que o número de tipos diminuí, se aumenta o segurança da operação realizada com eles.
 
 ### Typeclasses
 Haskell possui tipos assim como outras linguagens e eles podem ser:
-* Integers
-* Doubles
-* Strings
-* Chars
-* etc
+
+- Integers
+- Doubles
+- Strings
+- Chars
+- etc
 
 Mas a linguagem também possui typeclasses, que são similares à interfaces em outras linguagens, elas são o meio de se trabalhar com multiplos tipos de dados.
 
@@ -205,19 +286,24 @@ main = do
 ## Apêndicie
 ### Foldl vs Foldr
 
+### Vantagens de Funcional em Processamento Paralelo
+
 ## Referências
 
 ### Artigos
-* [What is functional programming](https://www.quora.com/What-is-functional-programming)
-* [So You Want To Be A Functional Programmer](https://medium.com/@cscalfani/so-you-want-to-be-a-functional-programmer-part-1-1f15e387e536)
+- [What is functional programming](https://www.quora.com/What-is-functional-programming)
+- [So You Want To Be A Functional Programmer](https://medium.com/@cscalfani/so-you-want-to-be-a-functional-programmer-part-1-1f15e387e536)
 
 ### Códigos
-* [Project Euler - Implementações](https://github.com/Fazendaaa/project-euler)
+- [Project Euler - Implementações](https://github.com/Fazendaaa/project-euler)
 
 ### Notas
-* [Intro To Haskell](https://github.com/Fazendaaa/introToHaskell/)
+- [Intro To Haskell](https://github.com/Fazendaaa/introToHaskell/)
+
+### Fóruns
+- [Closures vs. Currying](https://groups.google.com/forum/#!topic/comp.lang.functional/l_2k3l9xYes)
 
 ### Podcasts
 #### Hipsters.Tech
-* [Linguagens Funcionais](https://hipsters.tech/linguagens-funcionais-hipsters-91/)
-* [Tecnologias no Nubank](https://hipsters.tech/tecnologias-no-nubank-hipsters-01/)
+- [Linguagens Funcionais](https://hipsters.tech/linguagens-funcionais-hipsters-91/)
+- [Tecnologias no Nubank](https://hipsters.tech/tecnologias-no-nubank-hipsters-01/)
