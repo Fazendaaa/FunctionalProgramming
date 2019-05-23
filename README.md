@@ -5,7 +5,9 @@ author:
   - USP 8598732
 ---
 
-Durante o decorrer deste trabalho, os exemplos utilizados para demonstrar o paradigma funcional foram feitos em [Haskell](https://www.haskell.org/), que podem ser escritos em arquviso `.hs` e rodados com o [Glasgow Haskell Compiler (GHC)](https://www.haskell.org/downloads/) no computador -- junto com a implementação do seu ambiente de REPL, o GHCi --, há uma alternativa online para rodar tais exemplos, o [repl.it](https://repl.it/languages/haskell). Tal linguagem fora escolhida devido a facilidade e conhecimento prévio dela.
+Durante o decorrer deste trabalho, os exemplos utilizados para demonstrar o paradigma funcional foram feitos em [Haskell](https://www.haskell.org/), que podem ser escritos em arquviso `.hs` e rodados com o [Glasgow Haskell Compiler (GHC)](https://www.haskell.org/downloads/) no computador. Caso decida utilizar o `ghc` lembre-se de salvar o código em um `*.hs` pois a ferramenta servirá de compilador para ele, caso decida utilizar o REPL da linguagem, o GHCi, não coloque o header da função -- a linha que vem logo em cima da função com a tipagem explicitada -- e, além disso, rode a função puramente, sem o uso da função `main`. Há também uma alternativa online para rodar tais exemplos, o [repl.it](https://repl.it/languages/haskell), nesse caso você deverá copiar e colar o código sem nenhuma alteração e clicar no botão `run` presente no site.
+
+Tal linguagem fora escolhida devido a facilidade, conhecimento prévio dela e por se tratar de uma implementação pura do paradigma funcional.
 
 ## Noções Básicas
 Assim como os outros paradigmas de computação como: Orientado a Objetos, Lógico, Imperativo e etc; Funcional se trata de um conjunto de regras nas quais as linguagens que se propoem a implementar eles devem seguir. Muitas vezes essas mesmas linguagens implementam multiplos paradigmas como, por exemplo, [JavaScript](https://www.javascript.com/) e outras, que implementam só um, são chamadas de "puras", assim como Haskell. Então é importante saber diferenciar se uma linguagem segue à risca um paradigma à risca antes de criticar ele ou a própria linguagem.
@@ -85,6 +87,35 @@ main = do
 
 No caso de Haskell tal operador é dado através do ponto mesmo, ao invés de se criar uma função `isOdd` o mesmo pode ser realizado para esse caso ao se compor o `not` com a função `isEven` uma vez que todo número par não é um número ímpar, basta verificar-se se um número é par e negar seu resultado para obter-se se o mesmo é ou não um número ímpar.
 
+### Funções de Alta Ordem
+Talvez o conceito mais vangloriado em apresentações sobre linguagens funcionais e também um dos que mais define a simplicidade e ideia do paradigma, basicamente ele representa duas coisas:
+
+- Pode receber funções como parametros
+- Pode retornar funções
+
+Essa ideia será melhor exemplificada durante o resto do trabalho, inclusive começando no próximo tópico, as [funções anonimas](#fun%C3%A7%C3%B5es-anonimas).
+
+### Funções Anonimas
+Também conhecidas como funções lambdas, hoje em dia liguangens que não são necessariamente multi-paradigmas como [C#](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/) e [Java](https://www.oracle.com/java/) implementam ela. Funções anonimas são "funções sem nome".
+
+Elas são geralmente utilizadas ao se passar uma função por parametro, como a parte da maneira [sem loop](#sem-loops) mostra, só que também podem ser utilizadas em [closures](#closures) demonstram. Um exemplo simples que trabalha em cima da ideia de composição de funções será dado em seguida -- não é um exemplo muito prático mas serve para clarificar a ideia:
+```haskell
+squareAndMultiplyByTwo :: Num a => (a -> a) -> (a -> a) -> a -> a
+squareAndMultiplyByTwo first second value = (second . first) value
+
+main :: IO()
+main = do
+    print $ squareAndMultiplyByTwo (\x -> (**) x x) (\y -> (*) y 2) 2
+```
+
+A função `squareAndMultiplyByTwo` recebe três parametros:
+
+- first: uma função que recebe um valor e retorna o seu quadrado
+- second: uma função que recebe um valor e retorna o seu dobro
+- value: um valor
+  
+A função `first` será excutada primeiro e o seu valor calculado servirá como input para a função `second`, isso é mostrado pela composição demonstrada. O valor passado em `value` que servirá de input para a primeira função. Com a [notação de ponto livre](#nota%C3%A7%C3%A3o-de-ponto-livre) que será vista a seguir, há como melhorar ainda mais essa escrita de função.
+
 ### Notação de ponto livre
 É uma maneira de compor funções sem expecificar seus argumentos.
 
@@ -105,13 +136,6 @@ main = do
 ```
 
 Como a função `addFiveAndMutplityByTwo` é formada pela composição de outras duas, `addFive` e `multiplyByTwo`, seus parametros não precisam ser explicitados pois ela "herda" a definição da composição pela qual é formada; o que a torna menos verbosa e reduz redundâncias.
-
-### Funções de Alta Ordem
-- Pode receber funções como parametros
-- Pode retornar funções
-
-#### Funções Anonimas
-Também conhecidas como funções lambdas
 
 ### Recursão
 Recursão é o ato de uma função chamar ela mesma, para isso a função em si deve ter uma condição de parada -- uma característica na qual ela irá de parar de fazer chamadas a ela mesma --, isso por si só não é uma característica de linguagens funcionais uma vez que é uma característica de linguagens de programação em si.
