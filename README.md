@@ -177,13 +177,6 @@ A função recebeu três paramentros, o primeiro é a função a ser utilizada, 
 
 A diferença tradizda por `foldl` pode ser gritante em outros "reduces" de outras linguagens, ainda mais quando não se sabe o limite do array, o que pode ser aplicado principalmente em Haskell em [verificações não estritas](#verifica%C3%A7%C3%B5es-n%C3%A3o-estritas). Outra diferença é que existe um `foldr` que pode ser visto no apendice [foldl vs foldr](#foldl-vs-foldr).
 
-### Estruturas de controle
-#### Pattern Matching
-
-#### Guards
-
-#### If Then Else
-
 ### Currying
 Currying é a técnica de aplicar-se parcialmente uma função, aplicando-se mais de duas funções sendo que cada uma aceita **UM** parametro e retorna **UM** resultado, permitindo a ilusão de uma função de multiplos parametros:
 ```haskell
@@ -229,13 +222,44 @@ Nesse caso a função `powerOf` recebe, em sua primeira chamada, um número para
 
 Após essa explicação, a diferença entre closures e [currying](#currying) pode ter ficado mais clara, mas caso não tenha ficado, só pensar que closure trata-se de uma aplicação de composição de funções sem [variáveis livres](#vari%C3%A1veis-livres), enquanto currying possuí tais variáveis livres em seu contexto.
 
-## Arrays
+### Estruturas de controle
+Programas seguem fluxos de controle e o paradigma funcional possui maneira de estruturar eles.
 
-## Lista de prioridades
+#### Ternário
+O famoso `if ... then ... else ...`. Diferentemente de outros paradigmas, o funcional não implementa a possibilidade de declarar vários `if` seguidos como outros permitem, isso tem a ver com o lema de uma função ser um valor e não uma sequencia de expressões. Então para evitar "decisões" a serem tomadas dentro de um contexto, a função é reduzida a tomar duas decições apenas:
+```haskell
+main :: IO()
+main = do
+    print $ if 5 > 4 then "greater" else "lesser"
+```
 
-## Linguagem LISP
+Neste caso `"greater"` aparecerá no terminal.
 
-### Funções primitivas
+A ideia em si não é nova para linguagens de computação, mas sua limitação sim uma vez que os outros meios de controlar o fluxo de execução de um programa supre essas necessidades.
+
+#### Guards
+Expandindo a ideia de que funções são valores e que elas podem "variar" de acordo seu parametros, guards servem para
+
+#### Pattern Matching
+Linguagens funcionais por padrão não possuem switch cases, para emular o seu comportamento, _pattern matching_ são disponibiliazdos. Eles não são únicos do paradigma funcional, o paradigma lógico também os possuí; a ideia por trás deles é tratar a função de maneira diferente de acordo os seus inputs.
+```haskell
+myTake :: Int -> [a] -> [a]
+myTake 0   _    = []
+myTake _   []   = []
+myTake n (x:xs) = x : take ((-) n 1) xs
+
+main :: IO()
+main = do
+    print $ myTake 2 [1..10]
+```
+
+Neste caso, `myTake` implementa uma funcionalidade de retirar _n_ valores de um array e retornar eles em um novo array -- uma vez que [imutabilidade](#imutabilidade) impede de se alterar o array passado como parametro, um novo deverá ser criado para armazenar uma cópia dos valores contidos na fonte --; neste caso, cada uma declaração da função possui os seguintes comportamentos:
+1. Caso seja para retirar nenhum valor, retorne um array;
+2. Caso o array seja vazio, retorne um array vazio;
+3. Caso `n` elementos sejam necessários, pegue o primeiro e depois chame a [recursivamente](#recurs%C3%A3o) para retirar os outros `n - 1` elementos.
+
+##### Wildcard
+Caso o `_` na declaração da função da função tenha sido díficil de se interpretar para entender o que ele faz, simplesmente é um placeholder que indica ao compilador para não se preocupar com aquela constantes em si, ela vai estar lá porque Haskell é uma linguagem que se orienta pela posição das constantes do que pelo seu nome. E nos casos demonstrados quando o valor da posição não é o importante, o tamanho o array era e vice-versa.
 
 ## Lambda cáculo
 Antes de se explicar mais sobre [Haskell](#haskell), um tópico importante a se expor é que a linguagem foi feita baseando-se muito na lógica por trás do lambda cáculo.
@@ -310,11 +334,11 @@ main = do
 
 Nesse caso a chamada acarretará em várias chamadas recurssivas:
 
-![Fibonnaci](./img/fibonnaci.png)
+![](./img/fibonnaci.png)
 
 Mesmo com as vantagens que a [imutabilidade](#imutabilidade) dispõe, nesse caso ainda há cinco chamadas para `fibonnaci 3`, oito para `fibonnaci 2` e cinco para `fibonnaci 1`. Ainda assim Fibonnaci é um problema comumente implementado com uma estrutura de loop em outras linguagens justamente por causa desse gargalo não necessariamente de processamento, mas de chamadas em si. Compiladores percebem tais padrões e, debaixo do capô, implementam situações assim em um "loop" quando traduzem o seu código para código de máquina, o que aumenta a performance do código sem perder a transparência da legibilidade que ele apresenta na atual forma.
 
-### Exemplos
+### Exemplo
 Assim como reportado pelo sétimo problema no [Project Euler](https://projecteuler.net/problem=7) propõe: _"Ao listar os seis primeiros números primos: 2, 3, 5, 7, 11 e 13; conseguimos perceber que o sexto é 13. Qual é o número primo na posição 10 001?"_
 
 Uma das maneiras de se implementar esse problema é seria percorrer infinitamente a sequência de todos os números inteiros positivos até se chegar no 10 001 primo. O problema dessa abordagem é que não existe uma fórmula fechada para se calcular números primos, ou seja, para cada número da sequência dve ser verificado se ele é ou não primo e uma das maneiras de se fazer isso é através do [Crivo de Eratóstenes](https://pt.wikipedia.org/wiki/Crivo_de_Erat%C3%B3stenes); só que o crivo em si, implementado na função `isPrime`, pode ser rodado múltiplas vezes em outros cenários para o mesmo número. Digamos que decidimos rodá-la com o número 101239, o resultado para este valor retornará `False` na sua primeira vez ao ser calculado, só que em todas as vezes subsequentes ao invés de ser novamente calculado será apenas retornado.
@@ -331,6 +355,8 @@ main = do
     let nth = 10001
     print $ (last . take ((-) nth 1)) [ number | number <- [2..], isPrime number ]
 ```
+
+Esse cenário apresenta duas novas palavras chaves, `let` e `where`, que representam 
 
 ## Apêndicie
 ### Foldl vs Foldr
