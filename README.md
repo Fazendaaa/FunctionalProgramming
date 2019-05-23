@@ -5,7 +5,7 @@ author:
   - USP 8598732
 ---
 
-Durante o decorrer deste trabalho, os exemplos utilizados para demonstrar o paradigma funcional foram feitos em [Haskell](https://www.haskell.org/), que podem ser escritos em arquviso `.hs` e rodados com o [Glasgow Haskell Compiler (GHC)](https://www.haskell.org/downloads/) no computador, há uma alternativa online para rodar tais exemplos, o [repl.it](https://repl.it/languages/haskell). Tal linguagem fora escolhida devido a facilidade e conhecimento prévio dela.
+Durante o decorrer deste trabalho, os exemplos utilizados para demonstrar o paradigma funcional foram feitos em [Haskell](https://www.haskell.org/), que podem ser escritos em arquviso `.hs` e rodados com o [Glasgow Haskell Compiler (GHC)](https://www.haskell.org/downloads/) no computador -- junto com a implementação do seu ambiente de REPL, o GHCi --, há uma alternativa online para rodar tais exemplos, o [repl.it](https://repl.it/languages/haskell). Tal linguagem fora escolhida devido a facilidade e conhecimento prévio dela.
 
 ## Noções Básicas
 Assim como os outros paradigmas de computação como: Orientado a Objetos, Lógico, Imperativo e etc; Funcional se trata de um conjunto de regras nas quais as linguagens que se propoem a implementar eles devem seguir. Muitas vezes essas mesmas linguagens implementam multiplos paradigmas como, por exemplo, [JavaScript](https://www.javascript.com/) e outras, que implementam só um, são chamadas de "puras", assim como Haskell. Então é importante saber diferenciar se uma linguagem segue à risca um paradigma à risca antes de criticar ele ou a própria linguagem.
@@ -41,6 +41,8 @@ main = do
 ```
 
 O GHC pegaria a segunda atribuição de `foo` e a marcaria como inválida, não permitindo a execução do programa. Por essas e outras as variáveis possuem outro nome em linguagens funcionais, **constantes**.
+
+Para aqueles mais familiares com outras linguagens que permitem processos simalares, pode conhecer isso como [memoization](https://en.wikipedia.org/wiki/Memoization); técnica essa que pode também ser implementada a nível de hardware.
 
 Cenários asssim que representam a vantagem da imutabilidade. Tendo isto em mente, há casos que realmente o valor de retorno pode varia dado há uma conexão de internet, banco de dados ou até mesmo leitura de arquivos, casos assim são conhecidos por gerarem [efeitos colaterais](#efeitos-colaterais).
 
@@ -88,10 +90,13 @@ No caso de Haskell tal operador é dado através do ponto mesmo, ao invés de se
 
 Como pode é mostrado nos exemplos em Haskell até agora, as funções possuem um "header" com seu nome e os tipos de dados que recebem e retornam; essa informação não é necessária uma vez que o compilador é autossuficiente para inferir elas. Só que, por causa delas, a notação de ponto livre pode ser melhor explicada:
 ```haskell
+addFive :: Num a => a -> a
 addFive x = (+) x 5
 
+multiplyByTwo :: Num a => a -> a
 multiplyByTwo y = (*) y 2
 
+addFiveAndMutplityByTwo :: Num a => a -> a
 addFiveAndMutplityByTwo = addFive . multiplyByTwo
 
 main :: IO()
@@ -158,9 +163,10 @@ A diferença tradizda por `foldl` pode ser gritante em outros "reduces" de outra
 ### Currying
 Currying é a técnica de aplicar-se parcialmente uma função, aplicando-se mais de duas funções sendo que cada uma aceita **UM** parametro e retorna **UM** resultado, permitindo a ilusão de uma função de multiplos parametros:
 ```haskell
-addTwo :: Integral a => a -> a -> a
+addTwo :: Num a => a -> a -> a
 addTwo x y = (+) x y
 
+partialAdd :: Num a => a -> a -> a
 partialAdd x = addTwo x
 
 main :: IO()
@@ -264,6 +270,25 @@ main = do
 ```
 
 ### Tail Call Optimization (TCO)
+Uma vez que [recursão](#recurs%C3%A3o) é uma ideia já estabelecida em computação, seja ela funcional ou não, há também implementações de problemas nos quais eles pode ser melhor para manipular recursivamente mas sua performance não seria uma das melhores. Para tal, o caso de Fibonnaci seria um bom exemplo:
+```haskell
+fibonnaci :: Integral a => a -> a
+fibonnaci n
+    | (==) 1 n = 1
+    | (==) 2 n = 1
+    | (<) 2 n = (+) (fibonnaci $ (-) n  1) (fibonnaci $ (-) n  2)
+    | otherwise = 0
+
+main :: IO()
+main = do
+    print $ fibonnaci 7
+```
+
+Nesse caso a chamada acarretará em várias chamadas recurssivas:
+
+![Fibonnaci](./img/fibonnaci.png)
+
+Mesmo com as vantagens que a [imutabilidade](#imutabilidade) dispõe, nesse caso ainda há cinco chamadas para `fibonnaci 3`, oito para `fibonnaci 2` e cinco para `fibonnaci 1`. Ainda assim Fibonnaci é um problema comumente implementado com uma estrutura de loop em outras linguagens justamente por causa desse gargalo não necessariamente de processamento, mas de chamadas em si. Compiladores percebem tais padrões e, debaixo do capô, implementam situações assim em um "loop" quando traduzem o seu código para código de máquina, o que aumenta a performance do código sem perder a transparência da legibilidade que ele apresenta na atual forma.
 
 ### Exemplos
 Assim como reportado pelo sétimo problema no [Project Euler](https://projecteuler.net/problem=7) propõe: _"Ao listar os seis primeiros números primos: 2, 3, 5, 7, 11 e 13; conseguimos perceber que o sexto é 13. Qual é o número primo na posição 10 001?"_
