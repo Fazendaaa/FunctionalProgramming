@@ -7,7 +7,15 @@ author:
 
 Durante o decorrer deste trabalho, os exemplos utilizados para demonstrar o paradigma funcional foram feitos em [Haskell](https://www.haskell.org/), que podem ser escritos em arquviso `.hs` e rodados com o [Glasgow Haskell Compiler (GHC)](https://www.haskell.org/downloads/) no computador. Caso decida utilizar o `ghc` lembre-se de salvar o código em um `*.hs` pois a ferramenta servirá de compilador para ele, caso decida utilizar o REPL da linguagem, o GHCi, não coloque o header da função -- a linha que vem logo em cima da função com a tipagem explicitada -- e, além disso, rode a função puramente, sem o uso da função `main`. Há também uma alternativa online para rodar tais exemplos, o [repl.it](https://repl.it/languages/haskell), nesse caso você deverá copiar e colar o código sem nenhuma alteração e clicar no botão `run` presente no site.
 
-Tal linguagem fora escolhida devido a facilidade, conhecimento prévio dela e por se tratar de uma implementação pura do paradigma funcional.
+Tal linguagem fora escolhida devido a facilidade, conhecimento prévio dela e por se tratar de uma implementação pura do paradigma funcional. Mas outras linguagens merecem ser citadas antes de se prosseguir:
+
+- [Closure](https://clojure.org/)
+- [LISP](https://lisp-lang.org/)
+- [F#](https://fsharp.org/)
+- [Elixir](https://elixir-lang.org/)
+- [Erlang](https://www.erlang.org/)
+
+A curiosidade sobre Elixir é que seu criador é o brasileiro José Valim.
 
 ## Noções Básicas
 Assim como os outros paradigmas de computação como: Orientado a Objetos, Lógico, Imperativo e etc; Funcional se trata de um conjunto de regras nas quais as linguagens que se propoem a implementar eles devem seguir. Muitas vezes essas mesmas linguagens implementam multiplos paradigmas como, por exemplo, [JavaScript](https://www.javascript.com/) e outras, que implementam só um, são chamadas de "puras", assim como Haskell. Então é importante saber diferenciar se uma linguagem segue à risca um paradigma à risca antes de criticar ele ou a própria linguagem.
@@ -55,6 +63,8 @@ Outro exemplo seria uma função que utiliza um número randomico, no qual para 
 
 Em suma, efeitos colaterais são comportamentos não esperados por uma aplicação. Isso pode ficar mais claro uma vez que [lambda cáculo](#lambda-c%C3%A1culo) for apresentado.
 
+Empresas como o [Nubank](https://nubank.com.br/) utilizam um padrão de se colocar um ponto de exclamação no nome da função para indicar para o programador que a função que ele está utilizando possui efeitos colaterais e permite com que a lógica a partir desse ponto possa ser refatorada para se levar isso em conta.
+
 ### Pureza
 A ideia de pureza muitas vezes é dada como sinônimo para [imutabilidade](#imutabilidade),só que ela é mais simples e pode ser implementada mesmo em linguagens não funcionais. Basicamente a pureza representa funções que, para funcionar, dependem apenas de seus argumentos e parametros passados para elas; ou seja, nada de variáveis globais -- seja para lê-las ou alterá-las -- e, além disso, a função não deverá alterar os valores de seus parametros.
 
@@ -63,7 +73,7 @@ Ou seja, a seguinte função, em JavaScript, é considerada pura pois apenas dep
 const powerOf = (a, b) => a ** b;
 ```
 
-Como funções puras podem sim causar [efeitos colaterais](#efeitos-colaterais), uma não excluí a outra. Além disso, não existem funções `void` ou seja, uma função deverá **SEMPRE** retornar algo.
+Como funções puras podem sim causar [efeitos colaterais](#efeitos-colaterais), uma não excluí a outra. Além disso, não existem funções `void` ou seja, uma função deverá **SEMPRE** retornar algo; este ponto é bem importante uma vez que linguagens como F# não possuí uma das características mais típicas de linguagens de computação independentemente do paradigma, o `NULL`. Essa falta dessa característica é diretamenta relacionada ao fato de que nulo não é um valor em si, mas sim um estado; como o paradigma reinforça o uso de constantes, um estado é algo que vai contra isso pois indica que algo pode mudar seu valor e se o valor muda não é mais uma constante e sim uma variável.
 
 Todas essas aparentes "restrições" que pureza impõe acabam tornando na verdade o código mais simples de se entender.
 
@@ -92,6 +102,7 @@ Talvez o conceito mais vangloriado em apresentações sobre linguagens funcionai
 
 - Pode receber funções como parametros
 - Pode retornar funções
+- São considerados "cidadãos de primeira classe"
 
 Essa ideia será melhor exemplificada durante o resto do trabalho, inclusive começando no próximo tópico, as [funções anonimas](#fun%C3%A7%C3%B5es-anonimas).
 
@@ -238,7 +249,20 @@ Neste caso `"greater"` aparecerá no terminal.
 A ideia em si não é nova para linguagens de computação, mas sua limitação sim uma vez que os outros meios de controlar o fluxo de execução de um programa supre essas necessidades.
 
 #### Guards
-Expandindo a ideia de que funções são valores e que elas podem "variar" de acordo seu parametros, guards servem para
+Expandindo a ideia de que funções são valores e que elas podem "variar" de acordo seu parametros, guards servem para poder representar tal comportamento:
+```haskell
+value :: Integer -> [Char]
+value n
+    | (>) 0 n = "negative"
+    | (==) 0 n = "zero"
+    | otherwise = "positive"
+
+main :: IO()
+main = do
+    print $ value 2
+```
+
+Neste caso, `"positive"` será apresentado no terminal da aplicação, uma vez que o valor foi comparado com 0 e não é menor ou igual a zero; a flag do `otherwise` irá rodar e dar a match com o valor necessário para esse caso.
 
 #### Pattern Matching
 Linguagens funcionais por padrão não possuem switch cases, para emular o seu comportamento, _pattern matching_ são disponibiliazdos. Eles não são únicos do paradigma funcional, o paradigma lógico também os possuí; a ideia por trás deles é tratar a função de maneira diferente de acordo os seus inputs.
@@ -261,18 +285,91 @@ Neste caso, `myTake` implementa uma funcionalidade de retirar _n_ valores de um 
 ##### Wildcard
 Caso o `_` na declaração da função da função tenha sido díficil de se interpretar para entender o que ele faz, simplesmente é um placeholder que indica ao compilador para não se preocupar com aquela constantes em si, ela vai estar lá porque Haskell é uma linguagem que se orienta pela posição das constantes do que pelo seu nome. E nos casos demonstrados quando o valor da posição não é o importante, o tamanho o array era e vice-versa.
 
+### Não mencionados
+Alguns artigos citam os seguintes temas como fazendo parte do core do paradigma:
+
+- Modularidade
+- Mantenabilidade
+- Performance
+
+Todavia é pouco provável pensar em um paradigma que não vise eles, seja funcional ou não. Assim sendo tais temas são muito mais colocados para inflar o paradigma e vender uma ideia de um _"jack for all trades"_ -- um canivete suíço que irá resolver todo e qualqer problema.
+
+Funcional ou não os paradigmas tem o seu contexto e sua maneira de ser escrito. Assim como alguns sites de comparadores de benchmarks de linguagens procuram escrever a mesma coisa em linguagens diferentes com sotaques -- "paradigmas" -- muitas vezes não nativos à elas, linguagens como [Scala](https://scala-lang.org/) que não é puramente funcional acabam perdendo sua performance quando comparadas às outras por estar rodando em um estado "não natural". O apêndice sobre o [ressurgimento](#ressurgimento-de-funcional) do paradigma cobre um pouco e aprofunda esses pontos.
+
 ## Lambda cáculo
-Antes de se explicar mais sobre [Haskell](#haskell), um tópico importante a se expor é que a linguagem foi feita baseando-se muito na lógica por trás do lambda cáculo.
+Antes de se explicar mais sobre [Haskell](#haskell), um tópico importante a se expor é que a linguagem foi feita baseando-se muito na lógica matemática por trás do lambda cáculo -- também representado por λ.
+
+Trata-se de uma maneira de representar instruções reduzidas de um problema, fundamentado em alguns conceitos apresentados a seguir.
 
 ### Equivalência Alpha
+Euivalência alpha é a representação de funções que realizam a mesma coisa de maneiras diferentes:
+```
+λx.x == λd.d == λz.z
+```
 
 ### Redução Beta
+Aplicação de um termo lambda para um argumento dntro de um corpo da abstração:
+```
+(λx.x)2         (λx.x+1)2+1         (λx.x)(λy.y)z
+      2                 3          ((λx.x)(λy.y))z
+                                    [x := (λy.y)]
+                                    (λy.y)z
+                                    [y := z]
+                                     z
+
+```
+Aplicações no cáculo lambda são associativas à esquerda.
 
 ### Variáveis Livres
+Variáveis que não são nomeadas no cabeçalho da função -- ao contrário de variáveis vínculadas:
+```
+λx.xy           (λx.xy)z
+                (λ[x := z].xy)
+                zy
+```
+[Equivalência alpha](#equival%C3%AAncia-alpha) não se aplica à variáveis livres.
 
 ### Argumentos múltiplos
+Cada lambda pode apenas se vincularn a um parametro e pode aceitar apenas um argumento, isso é conhecido como [currying](#currying):
+```
+λxy.xy == λx(λy.xy)     λx.x            λxy.xy                  λxy.xy
 
-### Divergencia
+                       (λx.x) 1        (λxy.xy) 1 2            (λxy.xy)(λz.a) 1
+                       [x := 1]        (λx.(λy.xy)) 1 2        (λx(λy.xy))(λz.a) 1
+                        1              [x := 1]                [x := (λz.a)]
+                                       (λy.1y) 2               (λy(λz.a)y) 1
+                                       [y := 2]                [y := 1]
+                                        1 2                    (λz.a) *
+                                                                a
+```
+
+### Combinadores
+É um termo lambda sem [variáveis livres](#vari%C3%A1veis-livres):
+```
+λx.x
+λxy.x
+λxyz.x(yz)
+```
+
+Não são combinadores:
+```
+λy.x -- x is free
+λx.xz -- z is free
+```
+
+### Divergência
+São reduções de processos que não terminam nunca:
+```
+(λx.xx)(λx.xx)
+[x := (λx.xx)]
+(λx.xx)(λx.xx)
+[x := (λx.xx)]
+(λx.xx)(λx.xx)
+     ...
+(λx.xx)(λx.xx)
+```
+
+Isso é valido principalmente em programação porque termos que divergem não produzem uma resposta de um resultado significativo.
 
 ## Haskell
 Haskell é famosa por:
@@ -302,7 +399,7 @@ Haskell possui tipos assim como outras linguagens e eles podem ser:
 - Chars
 - etc
 
-Mas a linguagem também possui typeclasses, que são similares à interfaces em outras linguagens, elas são o meio de se trabalhar com multiplos tipos de dados.
+Mas a linguagem também possui typeclasses, que são similares à interfaces em outras linguagens, elas são o meio de se trabalhar com multiplos tipos de dados; como "super tipos" nos quais funções podem trabalhar de maneira esperada de acordo com o tipo de valor passado à elas.
 
 ### Verificações não estritas
 Como nada será verificado até ser necessário, a linguagem permite iterações sobre valores não definidos, ou seja, se pode percorrer um vetor no qual há apenas o valor inicial e não seu valor final; isso obviamente pode acarretar em problemas assim como uma função recursiva sem condição de parada mas, ao mesmo tempo, permite uma flexibilidade na hora de se escrever o código.
@@ -356,18 +453,63 @@ main = do
     print $ (last . take ((-) nth 1)) [ number | number <- [2..], isPrime number ]
 ```
 
-Esse cenário apresenta duas novas palavras chaves, `let` e `where`, que representam 
+Esse cenário apresenta duas novas palavras chaves, `let` e `where`, que representam ecopos de contexto para declarações e, mesmo não sendo unânimes em linguagens funcionais,possuem sua difernça que pode ser melhor explorada na comparação [let vs where](https://wiki.haskell.org/Let_vs._Where).
+
+### Indo além
+Haskell também implementa outros conceitos matemáticos/funcionais que não foram cobertos aqui:
+
+- Monads
+- Functors
+- Combinators
+- etc
+
+Esses termos por ser "complicados" de serem explicados foi decidido deixá-los de lado, porém a [referência](#refer%C3%AAncias) utilizada aqui contêm vários materiais nos quais cobrem isso.
+
+Dito isso, pardigma funcional é muito atrelado à matemática, mesmo não sendo necessário para se compreender, um conhecimento básico de lógica é necessário para se escrever um bom código.
 
 ## Apêndicie
 ### Foldl vs Foldr
+Foi apresentado o foldl em [reduce](#reduce) e que ele é uma maneira de implementar essa tarefa, mas o que ele é em si e o que é a versão com **l** e com **r** de sufixo?
+
+"Fold" vem do inglês que pode livremente traduzida como "dobra", então nesse contexto de reduzir algo a um valor apenas, você estaria "dobrando" o array em um valor. O **l** -- de _left_ -- demonstra que está sendo realizado da esqureda para a direita e o **r** -- de _right_ -- demonstra o contrário, da esquerda para a direita:
+```
+                 Soma:
+foldl                       foldr
+0 [1..5]                    0 [1..5]
+1, 2, 3, 4, 5               1, 2, 3, 4, 5
+3, 3, 4, 5                     1, 2, 3, 9
+6, 4, 5                          1, 2, 12
+10, 5                               1, 14
+15                                     15
+```
+
+As diferenças práticas do foldl e do foldr aparecem quando [verificações não estritas](#verifica%C3%A7%C3%B5es-n%C3%A3o-estritas) ou o tamanho dos dados influênciam o desenvolvimento do algoritmo.
 
 ### Vantagens de Funcional em Processamento Paralelo
+Como linguagens como [C](https://clang.llvm.org/) demandam um alto conhecimento técnico para distribuição de cargas em múltiplos processadores, o paradigma funcional é bem visto nesse cenário pois ele "obriga" utilização de passagem de mensagem uma vez que a [imutabilidade](#imutabilidade) não permite referências à memória.
+
+Além disso, como [não há loops](#sem-loops) no paradigma, a distribuição das cargas fica por conta do compilador, tirando o trabalho do programador de ter que se preocupar com pragmas e ter que refatorar o código toda vez que um deploy para uma nova arquitetura de hardware ou mudança de estrutura de código o obrigue a tal.
+
+Os dois fatores apresentados são altamente valorizados pois reduzem a taxa de erros durante o processo de desenvolvimento.
+
+### Ressurgimento de Funcional
+Linguagens funcionais não são "novas" _per se_, muitas delas foram originadas na década de 60, o próprio Haskell é da década de 80, muito antes de linguagens como Java, Python ou até mesmo a mainstream Rust.
+
+O "renascimento" do funcional tem a ver com uma mistura de fatores, mas um dos principais é o desenvolvimento de hardware e barateamento da tencologia. Principalmente por causa da [imutabilidade](#imutabilidade) o uso de memória em linguagens funcionais é alto, o que até umas décadas atrás era praticamente impensável. Além disso, com a "lei" de Moore estagnando, o uso de múltiplos cores em CPUs vem colocando cada dia o uso de processamento paralelo em alta necessidade; duas fontes que cobrem bastante disso são os seguintes canais do YouTube que mesmo não sendo utilizado diretamente não produção deste trabalho possuem alta relevância para o que o paradigma funcional implica e necessita:
+
+- [Computerphile](https://www.youtube.com/user/Computerphile)
+- [Coreteks](https://www.youtube.com/channel/UCX_t3BvnQtS5IHzto_y7tbw)
 
 ## Referências
+Materiais utilizados para a escrita deste trabalho:
 
 ### Artigos
 - [What is functional programming](https://www.quora.com/What-is-functional-programming)
 - [So You Want To Be A Functional Programmer](https://medium.com/@cscalfani/so-you-want-to-be-a-functional-programmer-part-1-1f15e387e536)
+- [Let vs Where](https://wiki.haskell.org/Let_vs._Where)
+
+### Papers
+- [A Tutorial Introduction to the Lambda Calculus](http://www.inf.fu-berlin.de/lehre/WS03/alpi/lambda.pdf)
 
 ### Códigos
 - [Project Euler - Implementações](https://github.com/Fazendaaa/project-euler)
@@ -382,3 +524,7 @@ Esse cenário apresenta duas novas palavras chaves, `let` e `where`, que represe
 #### Hipsters.Tech
 - [Linguagens Funcionais](https://hipsters.tech/linguagens-funcionais-hipsters-91/)
 - [Tecnologias no Nubank](https://hipsters.tech/tecnologias-no-nubank-hipsters-01/)
+- [Elixir a linguagem hipster](https://hipsters.tech/elixir-a-linguagem-hipster-hipsters-48/)
+
+#### Lambda 3
+- [F#](https://www.lambda3.com.br/2019/03/lambda3-podcast-134-fsharp/?doing_wp_cron=1558661493.5192968845367431640625)
