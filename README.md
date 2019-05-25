@@ -15,7 +15,13 @@ Tal linguagem fora escolhida devido a facilidade, conhecimento prévio dela e po
 - [Elixir](https://elixir-lang.org/)
 - [Erlang](https://www.erlang.org/)
 
-A curiosidade sobre Elixir é que seu criador é o brasileiro José Valim.
+A curiosidade sobre Elixir é que seu criador é o brasileiro José Valim. Já sobre [Haskell](#haskell), que será explicada com maior detalhes mais para frente; um comentário sobre ela em uma questão sobre seus prós e contras no [StackOverflow](https://stackoverflow.com/a/1695080/7092954) pontua um contra que, em tradução livre, seria:
+
+_"Aprender Haskell irá arruinar todas as outras linguagens para você."_
+
+Brincadeiras a parte, Haskell é uma linguagem muito bem vista na comunidade de linguagens funcionais pois ser referenciada por sua "pureza" de implementação do paradigma, ela está para Funcional como [Smalltalk](https://squeak.org/) está para Orientado a Objetos.
+
+Por um simples motivo de diferenciar o trabalho apresentado aqui, foi utilizado a notação prefixada de operadores ao invés de seu equivalente infixado.
 
 ## Noções Básicas
 Assim como os outros paradigmas de computação como: Orientado a Objetos, Lógico, Imperativo e etc; Funcional se trata de um conjunto de regras nas quais as linguagens que se propoem a implementar eles devem seguir. Muitas vezes essas mesmas linguagens implementam multiplos paradigmas como, por exemplo, [JavaScript](https://www.javascript.com/) e outras, que implementam só um, são chamadas de "puras", assim como Haskell. Então é importante saber diferenciar se uma linguagem segue à risca um paradigma à risca antes de criticar ele ou a própria linguagem.
@@ -75,7 +81,28 @@ const powerOf = (a, b) => a ** b;
 
 Como funções puras podem sim causar [efeitos colaterais](#efeitos-colaterais), uma não excluí a outra. Além disso, não existem funções `void` ou seja, uma função deverá **SEMPRE** retornar algo; este ponto é bem importante uma vez que linguagens como F# não possuí uma das características mais típicas de linguagens de computação independentemente do paradigma, o `NULL`. Essa falta dessa característica é diretamenta relacionada ao fato de que nulo não é um valor em si, mas sim um estado; como o paradigma reinforça o uso de constantes, um estado é algo que vai contra isso pois indica que algo pode mudar seu valor e se o valor muda não é mais uma constante e sim uma variável.
 
-Todas essas aparentes "restrições" que pureza impõe acabam tornando na verdade o código mais simples de se entender.
+Todas essas aparentes "restrições" que pureza impõe acabam tornando na verdade o código mais simples de se entender:
+```haskell
+global :: Integral
+global = 0
+
+overwrittingParameter :: Integral
+overwrittingParameter a = where
+    a = (+) a a
+    global = (+) global global
+
+main :: IO()
+main = do
+    print $ overwrittingParameter 1
+```
+
+Este exemplo não será compliado pois:
+
+- O parametro `a` está sendo sobrescrito;
+- `global` é um valor que não é argumento de `overwrittingParameter`;
+- Mesmo se não fosse pelos itens anteriores, `overwrittingParameter` não funcionaria pois não retorna nenhum valor pois o bloco `where` começa logo em seguida.
+
+Esse cenário é tão absurdo que um ambiente de desenvolvimento com plugins para Haskell apresentaria todas essas inconsistências durante o processo de escrita do código.
 
 ### Composição de Funções
 Na matemática vista no ensino básico é ensinado composição de funções, na qual uma função redireciona seu resultado como entrada para outra:
@@ -400,6 +427,8 @@ Haskell possui tipos assim como outras linguagens e eles podem ser:
 - etc
 
 Mas a linguagem também possui typeclasses, que são similares à interfaces em outras linguagens, elas são o meio de se trabalhar com multiplos tipos de dados; como "super tipos" nos quais funções podem trabalhar de maneira esperada de acordo com o tipo de valor passado à elas.
+
+Typeclasses podem parecer um conceito de Orientado à Objetos, porém é um conceito bem Funcional.
 
 ### Verificações não estritas
 Como nada será verificado até ser necessário, a linguagem permite iterações sobre valores não definidos, ou seja, se pode percorrer um vetor no qual há apenas o valor inicial e não seu valor final; isso obviamente pode acarretar em problemas assim como uma função recursiva sem condição de parada mas, ao mesmo tempo, permite uma flexibilidade na hora de se escrever o código.

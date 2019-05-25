@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Paradigma Funcional
+##### Lucas Carotta
+
+---
+
+# Tópicos
+
+1. Imutabilidade
+2. Pureza
+3. Composição de Funções
+4. Funções de Alta Ordem
+5. Notação de Ponto Livre
+6. Recursão
+7. Currying
+8. Closures
+9. Estruturas de Controle
+
+---
+
+# Haskell
+
+_"Learning Haskell will ruin all other languages for you."_ - [@barkmadley](https://stackoverflow.com/a/1695080/7092954)
+
+---
+
+# Imutabilidade
+
+```haskell
+addTwo :: Integral a => a -> a -> a
+addTwo a b = (+) a b
+
+main :: IO()
+main = do
+    print $ addTwo 1 2
+```
+
+⚠️ Sem variáveis, mas sim constantes:
+
+```haskell
+main :: IO()
+main = do
+    foo = 1
+    foo = 2
+    print $ foo
+```
+
+---
+
+# Pureza
+
+⚠️ Uma função deve sempre retornar algo e alterar apenas trabalhar com seus argumentos
+
+```haskell
+global :: Integral
+global = 0
+
+overwrittingParameter :: Integral
+overwrittingParameter a = where
+    a = (+) a a
+    global = (+) global global
+
+main :: IO()
+main = do
+    print $ overwrittingParameter 1
+```
+
+---
+
+# Composição de Funções
+
+```haskell
+isEven :: Integer -> Bool
+isEven a = (==) (mod a 2) 0
+
+main :: IO()
+main = do
+    print $ isEven 10
+    print $ (not . isEven) 10
+```
+
+---
+
+# Funções de Alta Ordem
+## Funções Anonimas
+
+```haskell
+squareAndMultiplyByTwo :: Num a => (a -> a) -> (a -> a) -> a -> a
+squareAndMultiplyByTwo first second value = (second . first) value
+
+main :: IO()
+main = do
+    print $ squareAndMultiplyByTwo (\x -> (**) x x) (\y -> (*) y 2) 2
+```
+
+---
+
+# Notação de Ponto Livre
+
+```haskell
+addFive :: Num a => a -> a
+addFive x = (+) x 5
+
+multiplyByTwo :: Num a => a -> a
+multiplyByTwo y = (*) y 2
+
+addFiveAndMutplityByTwo :: Num a => a -> a
+addFiveAndMutplityByTwo = addFive . multiplyByTwo
+
+main :: IO()
+main = do
+    print $ addFiveAndMutplityByTwo 1
+```
+
+---
+
+# Recursão
+
+"Sem loops": linguagens funcionais desencorajam o uso de estruturas comuns de se percorrer estuturas como `for` ou `while` uma vez que elas não seguem um lema funcional: _"se preocupe com a forma mas sim a com a ideia"_.
+
+---
+
+# Recursão
+## Map
+
+```haskell
+main :: IO()
+main = do
+    print $ map (+1) [1..10]
+```
+
+---
+
+# Recursão
+## Filter
+
+```haskell
+main :: IO()
+main = do
+    print $ filter (\x -> (==) 0 (mod x 2)) [1..10]
+```
+
+---
+
+# Recursão
+## Reduce
+
+```haskell
+main :: IO()
+main = do
+    print $ foldl (+) 0 [1..10]
+```
+
+---
+
+# Currying
+
+```haskell
+addTwo :: Num a => a -> a -> a
+addTwo x y = (+) x y
+
+partialAdd :: Num a => a -> a -> a
+partialAdd x = addTwo x
+
+main :: IO()
+main = do
+  let partialAdded = partialAdd 5
+  print $ partialAdded 2
+```
+
+---
+
+# Closures
+
+```haskell
+powerOf :: Integer a => a -> (\a -> a)
+powerOf x = (\y -> y ^ x)
+
+powerOfTwo :: Integer a => a -> a
+powerOfTwo y = powerOf y 2
+
+powerOfThree :: Integer a => a -> a
+powerOfThree y = powerOf y 3
+
+main :: IO()
+main = do
+    print $ powerOfTwo 2
+    print $ powerOfTwo 3
+    print $ powerOfThree 2
+```
+
+---
+
+# Estruturas de Controle
+## Ternário
+
+```haskell
+main :: IO()
+main = do
+    print $ if 5 > 4 then "greater" else "lesser"
+```
+
+---
+
+# Estruturas de Controle
+## Guards
+
+```haskell
+value :: Integer -> [Char]
+value n
+    | (>) 0 n = "negative"
+    | (==) 0 n = "zero"
+    | otherwise = "positive"
+
+main :: IO()
+main = do
+    print $ value 2
+```
+
+---
+
+# Estruturas de Controle
+## Guards
+
+```haskell
+myTake :: Int -> [a] -> [a]
+myTake 0   _    = []
+myTake _   []   = []
+myTake n (x:xs) = x : take ((-) n 1) xs
+
+main :: IO()
+main = do
+    print $ myTake 2 [1..10]
+```
+
+---
+
+# Indo Além
+
+- Monads
+- Functors
+- Combinators
+- etc
+
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
